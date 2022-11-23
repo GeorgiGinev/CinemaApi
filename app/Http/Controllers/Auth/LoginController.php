@@ -51,12 +51,18 @@ class LoginController extends Controller
 
         $this->validator($data)->validate();
 
-        $password = Hash::make($data['password']);
+        $user = User::where('email', $data['email'])->first();
 
-        $user = User::where('email', $data['email'])
-            ->where('password', $password)->first();
+        if(!$user || !Hash::check($data['password'], $user->password)) {
+            $error = ValidationException::withMessages(['Wrong email or password']);
+            throw $error;
+        }
 
-        return response($password);
+        return response()->json([
+            'access_token' => $user->createToken("auth_token")->plainTextToken,
+            'token_type' => 'Bearer',
+            'expires_in' => 21600
+        ], 200);
     }
 
     /**

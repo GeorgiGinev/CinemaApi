@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Str;
 
 class RegisterController extends Controller
 {
@@ -47,9 +48,18 @@ class RegisterController extends Controller
      * @throws ValidationException
      */
     public function register(Request $request) {
+        
         $this->validator($request->all())->validate();
 
-        $this->create($request->all());
+        $user = $this->create($request->all());
+
+        return response()->json([
+            'status' => true,
+            'message' => 'User Created Successfuly',
+            'token' => $user->createToken('auth_token')->plainTextToken,
+            'token_type' => 'Bearer',
+            'password' => $user->password
+        ], 200);
     }
 
     /**
@@ -78,7 +88,7 @@ class RegisterController extends Controller
         return User::create([
             'name' => $data['name'],
             'email' => $data['email'],
-            'password' => Hash::make($data['password']),
+            'password' => Hash::make($data['password'])
         ]);
     }
 }
