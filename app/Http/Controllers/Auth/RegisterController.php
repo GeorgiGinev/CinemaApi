@@ -54,11 +54,9 @@ class RegisterController extends Controller
         $user = $this->create($request->all());
 
         return response()->json([
-            'status' => true,
-            'message' => 'User Created Successfuly',
-            'token' => $user->createToken('auth_token')->plainTextToken,
+            'access_token' => $user->createToken('auth_token')->plainTextToken,
             'token_type' => 'Bearer',
-            'password' => $user->password
+            'expires_in' => 21600
         ], 200);
     }
 
