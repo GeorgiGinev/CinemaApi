@@ -61,7 +61,7 @@ class LoginController extends Controller
         return response()->json([
             'access_token' => $user->createToken("auth_token")->plainTextToken,
             'token_type' => 'Bearer',
-            'expires_in' => 21600
+            'expires_in' => config('app.sanctum_expiration_time')
         ], 200);
     }
 

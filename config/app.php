@@ -69,6 +69,11 @@ return [
 
     'timezone' => 'UTC',
 
+    /**
+     * Sanctum expiration time of the token
+     */
+    'sanctum_expiration_time' => 21600,
+
     /*
     |--------------------------------------------------------------------------
     | Application Locale Configuration

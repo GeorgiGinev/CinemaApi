@@ -47,8 +47,9 @@ class RegisterController extends Controller
     /**
      * @throws ValidationException
      */
-    public function register(Request $request) {
-        
+    public function register(Request $request)
+    {
+
         $this->validator($request->all())->validate();
 
         $user = $this->create($request->all());
@@ -56,7 +57,7 @@ class RegisterController extends Controller
         return response()->json([
             'access_token' => $user->createToken('auth_token')->plainTextToken,
             'token_type' => 'Bearer',
-            'expires_in' => 21600
+            'expires_in' => config('app.sanctum_expiration_time')
         ], 200);
     }
 
