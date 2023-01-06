@@ -50,9 +50,9 @@ class RegisterController extends Controller
     public function register(Request $request)
     {
 
-        $this->validator($request->all())->validate();
+        $this->validator($request->all()['attributes'])->validate();
 
-        $user = $this->create($request->all());
+        $user = $this->create($request->all()['attributes']);
 
         return response()->json([
             'access_token' => $user->createToken('auth_token')->plainTextToken,
