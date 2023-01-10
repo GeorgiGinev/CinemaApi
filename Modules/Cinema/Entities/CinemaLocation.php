@@ -19,4 +19,8 @@ class CinemaLocation extends Model
     {
         return \Modules\Cinema\Database\factories\CinemaLocationFactory::new();
     }
+
+    public function cinema() {
+        return $this->belongsTo(Cinema::class);
+    }
 }

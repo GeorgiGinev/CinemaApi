@@ -17,12 +17,13 @@ class CreateCinemasTable extends Migration
             $table->id();
             $table->text('description');
             $table->string('name');
-            $table->string('images');
+            $table->text('images');
             $table->string('logo');
-            $table->json('capacity');
-            $table->unsignedBigInteger('cinema_location_id');
-            $table->unsignedBigInteger('owner_id');
+            $table->text('capacity');
+            $table->unsignedBigInteger('cinema_location_id')->nullable();
+            $table->unsignedBigInteger('owner_id')->nullable();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign('owner_id')
                 ->references('id')
