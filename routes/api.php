@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+require 'v1/cinema.php';
 
 Route::middleware('auth:sanctum')->get('/me', function (Request $request) {
     return $request->user();
@@ -22,5 +23,5 @@ Route::middleware('auth:sanctum')->post('/me/logout', [App\Http\Controllers\Auth
 Route::middleware('auth:sanctum')->post('/me/update', [App\Http\Controllers\Auth\UserUpdateController::class, 'update'])->name('update');
 Route::middleware('auth:sanctum')->patch('/me/change-password', [App\Http\Controllers\Auth\ChangePasswordController::class, 'reset'])->name('reset');
 
-Route::post('register', [App\Http\Controllers\Auth\RegisterController::class, 'register'])->name('register');
+Route::middleware('guest')->post('register', [App\Http\Controllers\Auth\RegisterController::class, 'register'])->name('register');
 Route::post('login', [App\Http\Controllers\Auth\LoginController::class, 'login'])->name('login');
