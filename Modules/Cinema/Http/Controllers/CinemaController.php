@@ -33,7 +33,6 @@ class CinemaController extends Controller
 
         //validate data
         $request->validate([
-            'attributes.description' => 'required',
             'attributes.name' => 'required',
             'attributes.images' => 'required',
             'attributes.logo' => 'required',
@@ -48,7 +47,7 @@ class CinemaController extends Controller
         $attributes['images'] = json_encode($this->verifyAndUpload($attributes['images']), JSON_UNESCAPED_SLASHES);
 
         //create new cinema and cinema location and link them
-        $cinema =  Cinema::create($attributes);
+        $cinema =  new Cinema($attributes);
 
         $cinemaLocation = CinemaLocation::create($relationships['cinemaLocation']['attributes']);
         $cinema->cinema_location_id = $cinemaLocation->id;
