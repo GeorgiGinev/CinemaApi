@@ -70,6 +70,7 @@ class CinemaController extends Controller
             return null;
         }
         $cinema['images'] = json_decode($cinema['images'], true);
+        $cinema['capacity'] = json_decode($cinema['capacity'], true);
         $cinema['images'] = $this->retriveImages($cinema['images']);
         $cinema['logo'] = $this->retriveImages($cinema['logo']);
 
@@ -85,6 +86,7 @@ class CinemaController extends Controller
         $cinemas =  Cinema::paginate(15);
         foreach ($cinemas as $cinema) {
             $cinema['images'] = json_decode($cinema['images'], true);
+            $cinema['capacity'] = json_decode($cinema['capacity'], true);
             $cinema['images'] = $this->retriveImages($cinema['images']);
             $cinema['logo'] = $this->retriveImages($cinema['logo']);
         }
