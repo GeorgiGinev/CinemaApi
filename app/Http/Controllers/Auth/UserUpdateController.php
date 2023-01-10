@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Validator;
 class UserUpdateController extends Controller
 {
     function update(Request $request) {
-        $this->validator($request->input('attributes'))->validate();
+        $this->validator($request->all()['attributes'])->validate();
 
         $user = $request->user();
 

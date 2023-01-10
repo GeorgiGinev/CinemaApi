@@ -14,12 +14,13 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+Route::middleware('auth:sanctum')->get('/me', function (Request $request) {
     return $request->user();
 });
 
-Route::middleware('auth:sanctum')->post('/logout', [App\Http\Controllers\Auth\LogoutController::class, 'logout'])->name('logout');
-Route::middleware('auth:sanctum')->post('users/update', [App\Http\Controllers\Auth\UserUpdateController::class, 'update'])->name('update');
+Route::middleware('auth:sanctum')->post('/me/logout', [App\Http\Controllers\Auth\LogoutController::class, 'logout'])->name('logout');
+Route::middleware('auth:sanctum')->post('/me/update', [App\Http\Controllers\Auth\UserUpdateController::class, 'update'])->name('update');
+Route::middleware('auth:sanctum')->post('/me/reset-password', [App\Http\Controllers\Auth\UserUpdateController::class, 'update'])->name('update');
 
 Route::post('register', [App\Http\Controllers\Auth\RegisterController::class, 'register'])->name('register');
 Route::post('login', [App\Http\Controllers\Auth\LoginController::class, 'login'])->name('login');
