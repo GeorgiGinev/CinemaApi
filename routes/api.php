@@ -20,7 +20,7 @@ Route::middleware('auth:sanctum')->get('/me', function (Request $request) {
 
 Route::middleware('auth:sanctum')->post('/me/logout', [App\Http\Controllers\Auth\LogoutController::class, 'logout'])->name('logout');
 Route::middleware('auth:sanctum')->post('/me/update', [App\Http\Controllers\Auth\UserUpdateController::class, 'update'])->name('update');
-Route::middleware('auth:sanctum')->post('/me/reset-password', [App\Http\Controllers\Auth\UserUpdateController::class, 'update'])->name('update');
+Route::middleware('auth:sanctum')->patch('/me/change-password', [App\Http\Controllers\Auth\ChangePasswordController::class, 'reset'])->name('reset');
 
 Route::post('register', [App\Http\Controllers\Auth\RegisterController::class, 'register'])->name('register');
 Route::post('login', [App\Http\Controllers\Auth\LoginController::class, 'login'])->name('login');
