@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Cinema\Http\Controllers\CinemaController;
 
-Route::controller(CinemaController::class)->prefix('cinemas')->group(function() {
+Route::controller(CinemaController::class)->middleware('auth:sanctum')->prefix('cinemas')->group(function() {
     Route::get('/{id}', 'getOne');
     Route::get('', 'getMany');
     Route::post('', 'create');
