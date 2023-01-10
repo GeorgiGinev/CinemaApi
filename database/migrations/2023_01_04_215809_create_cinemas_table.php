@@ -13,27 +13,29 @@ class CreateCinemasTable extends Migration
      */
     public function up()
     {
-        Schema::create('cinemas', function (Blueprint $table) {
-            $table->id();
-            $table->text('description');
-            $table->string('name');
-            $table->string('images');
-            $table->string('logo');
-            $table->json('capacity');
-            $table->unsignedBigInteger('cinema_location_id');
-            $table->unsignedBigInteger('owner_id');
-            $table->timestamps();
+        if (!Schema::hasTable('cinemas')) {
+            Schema::create('cinemas', function (Blueprint $table) {
+                $table->id();
+                $table->text('description');
+                $table->string('name');
+                $table->string('images');
+                $table->string('logo');
+                $table->json('capacity');
+                $table->unsignedBigInteger('cinema_location_id');
+                $table->unsignedBigInteger('owner_id');
+                $table->timestamps();
 
-            $table->foreign('owner_id')
-                ->references('id')
-                ->on('users')
-                ->onDelete('cascade');
+                $table->foreign('owner_id')
+                    ->references('id')
+                    ->on('users')
+                    ->onDelete('cascade');
 
-            $table->foreign('cinema_location_id')
-                ->references('id')
-                ->on('cinema_locations')
-                ->onDelete('cascade');
-        });
+                $table->foreign('cinema_location_id')
+                    ->references('id')
+                    ->on('cinema_locations')
+                    ->onDelete('cascade');
+            });
+        }
     }
 
     /**

@@ -13,13 +13,15 @@ class CreateCinemaLocationsTable extends Migration
      */
     public function up()
     {
-        Schema::create('cinema_locations', function (Blueprint $table) {
-            $table->id();
-            $table->string('address');
-            $table->double('latitude');
-            $table->double('longitude');
-            $table->timestamps();
-        });
+        if(!Schema::hasTable('cinema_locations')) {
+            Schema::create('cinema_locations', function (Blueprint $table) {
+                $table->id();
+                $table->string('address');
+                $table->double('latitude');
+                $table->double('longitude');
+                $table->timestamps();
+            });
+        }
     }
 
     /**
