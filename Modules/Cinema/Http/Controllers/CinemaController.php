@@ -91,7 +91,7 @@ class CinemaController extends Controller
      */
     public function getMany()
     {
-        $cinemas =  Cinema::get();
+        $cinemas =  Cinema::paginate(15);
         $cinemas->transform(function ($cinema) {
             $cinema->images = json_decode(($cinema->images), true);
             $cinema->images = $this->retriveImages($cinema->images);
