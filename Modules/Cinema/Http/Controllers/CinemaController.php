@@ -14,6 +14,7 @@ use Modules\Cinema\Entities\CinemaLocation;
 use App\Models\Token as Token;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\ImageTrait;
+use function MongoDB\BSON\toJSON;
 
 class CinemaController extends Controller
 {
@@ -69,12 +70,19 @@ class CinemaController extends Controller
         if (!$cinema) {
             return null;
         }
-        $cinema['images'] = json_decode($cinema['images'], true);
-        $cinema['capacity'] = json_decode($cinema['capacity'], true);
-        $cinema['images'] = $this->retriveImages($cinema['images']);
-        $cinema['logo'] = $this->retriveImages($cinema['logo']);
+        $cinema->images = json_decode(($cinema->images), true);
+        $cinema->images = $this->retriveImages($cinema->images);
+        $cinema->logo = $this->retriveImages($cinema->logo);
+        $cinema->capacity = json_decode($cinema->capacity, true);
 
-        return $cinema;
+        return response()->json([
+            'id'            => $id,
+            'attributes'    => $cinema,
+            'relationships' => [
+                'cinema_location' => $cinema->cinemaLocation,
+                'owner'           => $cinema->owner,
+            ]
+        ]);
     }
 
     /**
@@ -83,13 +91,22 @@ class CinemaController extends Controller
      */
     public function getMany()
     {
-        $cinemas =  Cinema::paginate(15);
-        foreach ($cinemas as $cinema) {
-            $cinema['images'] = json_decode($cinema['images'], true);
-            $cinema['capacity'] = json_decode($cinema['capacity'], true);
-            $cinema['images'] = $this->retriveImages($cinema['images']);
-            $cinema['logo'] = $this->retriveImages($cinema['logo']);
-        }
+        $cinemas =  Cinema::get();
+        $cinemas->transform(function ($cinema) {
+            $cinema->images = json_decode(($cinema->images), true);
+            $cinema->images = $this->retriveImages($cinema->images);
+            $cinema->logo = $this->retriveImages($cinema->logo);
+            $cinema->capacity = json_decode($cinema->capacity, true);
+
+            return [
+                'id' => $cinema->id,
+                'attributes' => $cinema,
+                'relationships' => [
+                    'cinema_location' => $cinema->cinemaLocation,
+                    'owner' => $cinema->owner,
+                ]
+            ];
+        });
         return $cinemas;
     }
 
