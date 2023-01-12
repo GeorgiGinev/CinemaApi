@@ -97,6 +97,16 @@ trait ImageTrait
             }
             return;
         }
+
         unlink($path . $media);
+    }
+
+    /**
+     * Checks if file exists
+     * @param mixed $path
+     * @return bool
+     */
+    private function isPathExists($path) {
+        return file_exists($path);
     }
 }

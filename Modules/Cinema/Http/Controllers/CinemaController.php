@@ -101,15 +101,26 @@ class CinemaController extends Controller
      */
     public function update(Request $request, int $id)
     {
+        $cinema = Cinema::where('id', $id)->first()->transform(['cinemaLocation']);
+        
+        if(!$cinema) {
+            return null;
+        }
+
         //validate data
         $this->createValidator($request->all())->validate();
         
         $attributes = $request->input('attributes');
+        $relationships = $request->input('relationships');
+
         $attributes['capacity'] = json_encode($attributes['capacity'], JSON_UNESCAPED_SLASHES);
-        $this->deleteImages($attributes['logo']);
-        $this->deleteImages($attributes['images']);
+
+        $this->deleteImages($cinema->attributes->logo);
+        $this->deleteImages(json_decode($cinema->attributes->images, true));
         $attributes['logo'] = $this->verifyAndUpload($attributes['logo']);
         $attributes['images'] = json_encode($this->verifyAndUpload($attributes['images']), JSON_UNESCAPED_SLASHES);
+
+        CinemaLocation::where('id', (int)$cinema->relationships->cinemaLocation->id)->update($relationships['cinemaLocation']['attributes']);
 
         return Cinema::where('id', $id)->update($attributes);
     }
