@@ -9,4 +9,5 @@ Route::controller(CinemaController::class)->middleware('auth:sanctum')->prefix('
     Route::post('', 'create');
     Route::put('/{id}', 'update');
     Route::delete('/{id}', 'delete');
+    Route::put('/restore/{id}', 'restore');
 });

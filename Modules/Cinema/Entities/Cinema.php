@@ -4,10 +4,11 @@ namespace Modules\Cinema\Entities;
 
 use App\Models\Base;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Cinema extends Base
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'name',

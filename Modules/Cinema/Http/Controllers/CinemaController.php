@@ -62,7 +62,7 @@ class CinemaController extends Controller
      */
     public function getOne($id)
     {
-        $cinema = Cinema::findOrFail($id);
+        $cinema = Cinema::withTrashed()->findOrFail($id);
 
         if (!$cinema) {
             return null;
@@ -79,9 +79,21 @@ class CinemaController extends Controller
      * Get one
      * @return null
      */
-    public function getMany()
+    public function getMany(Request $request)
     {
-        $cinemas =  Cinema::orderBy('id', 'DESC')->paginate(15);
+        $params = $request->all();
+
+        $keywords = '';
+        $with_trashed = false;
+
+        $cinemas = null;
+
+        if($request->input('with_trashed')) {
+            $cinemas =  Cinema::withTrashed()->orderBy('id', 'DESC')->paginate(15);
+        } else {
+            $cinemas =  Cinema::orderBy('id', 'DESC')->paginate(15);
+        }
+
         $cinemas->transform(function ($cinema) {
             $cinema->images = json_decode(($cinema->images), true);
             $cinema->images = $this->retriveImages($cinema->images);
@@ -132,14 +144,28 @@ class CinemaController extends Controller
      */
     public function delete($id)
     {
-        $record =  Cinema::findOrFail($id);
+        $cinema =  Cinema::findOrFail($id);
 
-        $record->images = json_decode($record->images, true);
-        $this->deleteImages($record->logo);
-        $this->deleteImages($record->images);
-        $record->cinemaLocation()->delete();
+        if (!$cinema) {
+            return null;
+        }
 
-        return $record->delete();
+        return $cinema->delete();
+    }
+
+    /**
+     * Restore the resource
+     * @param mixed $id of the resource
+     * @return mixed
+     */
+    public function restore($id) {
+        $cinema =  Cinema::withTrashed()->findOrFail((int)$id);
+
+        if (!$cinema) {
+            return null;
+        }
+
+        return $cinema->restore();
     }
 
     /**
