@@ -81,17 +81,21 @@ class CinemaController extends Controller
      */
     public function getMany(Request $request)
     {
-        $params = $request->all();
-
-        $keywords = '';
-        $with_trashed = false;
-
         $cinemas = null;
-
+        $keywords = $request->input('keywords');
+        
         if($request->input('with_trashed')) {
-            $cinemas =  Cinema::withTrashed()->orderBy('id', 'DESC')->paginate(15);
+            $cinemas = Cinema::onlyTrashed()->where(function ($q) use ($keywords) {
+                if($keywords) {
+                    $q->where('name', 'like', "%{$keywords}%");
+                }
+              })->orderBy('id', 'DESC')->paginate(15);
         } else {
-            $cinemas =  Cinema::orderBy('id', 'DESC')->paginate(15);
+            $cinemas = Cinema::where(function ($q) use ($keywords) {
+                if($keywords) {
+                    $q->where('name', 'like', "%{$keywords}%");
+                }
+              })->orderBy('id', 'DESC')->paginate(15);
         }
 
         $cinemas->transform(function ($cinema) {
