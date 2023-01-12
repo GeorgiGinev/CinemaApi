@@ -2,10 +2,10 @@
 
 namespace Modules\Cinema\Entities;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Models\Base;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class CinemaLocation extends Model
+class CinemaLocation extends Base
 {
     use HasFactory;
 
@@ -21,6 +21,6 @@ class CinemaLocation extends Model
     }
 
     public function cinema() {
-        return $this->belongsTo(Cinema::class);
+        return $this->belongsTo(Cinema::class, 'owner_id', 'id');
     }
 }

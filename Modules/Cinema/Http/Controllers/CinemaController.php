@@ -2,10 +2,10 @@
 
 namespace Modules\Cinema\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -30,18 +30,15 @@ class CinemaController extends Controller
     {
         //get request attributes and relationships
         $attributes = $request->input('attributes');
+        
         $relationships = $request->input('relationships');
 
         //validate data
-        $request->validate([
-            'attributes.name' => 'required',
-            'attributes.images' => 'required',
-            'attributes.logo' => 'required',
-            'attributes.capacity' => 'required',
-        ]);
+        $this->createValidator($request->all())->validate();
 
         //get user id
-        $userId = $this->getUserId($request->bearerToken());
+        //$userId = $this->getUserId($request->bearerToken());
+        $userId = $request->user()->id;
 
         $attributes['capacity'] = json_encode($attributes['capacity']);
         $attributes['logo'] = $this->verifyAndUpload($attributes['logo']);
@@ -75,14 +72,7 @@ class CinemaController extends Controller
         $cinema->logo = $this->retriveImages($cinema->logo);
         $cinema->capacity = json_decode($cinema->capacity, true);
 
-        return response()->json([
-            'id'            => $id,
-            'attributes'    => $cinema,
-            'relationships' => [
-                'cinema_location' => $cinema->cinemaLocation,
-                'owner'           => $cinema->owner,
-            ]
-        ]);
+        return response()->json($cinema->transform(['cinemaLocation']));
     }
 
     /**
@@ -91,21 +81,14 @@ class CinemaController extends Controller
      */
     public function getMany()
     {
-        $cinemas =  Cinema::paginate(15);
+        $cinemas =  Cinema::orderBy('id', 'DESC')->paginate(15);
         $cinemas->transform(function ($cinema) {
             $cinema->images = json_decode(($cinema->images), true);
             $cinema->images = $this->retriveImages($cinema->images);
             $cinema->logo = $this->retriveImages($cinema->logo);
             $cinema->capacity = json_decode($cinema->capacity, true);
 
-            return [
-                'id' => $cinema->id,
-                'attributes' => $cinema,
-                'relationships' => [
-                    'cinema_location' => $cinema->cinemaLocation,
-                    'owner' => $cinema->owner,
-                ]
-            ];
+            return $cinema->transform(['cinemaLocation', 'owner']);
         });
         return $cinemas;
     }
@@ -118,6 +101,9 @@ class CinemaController extends Controller
      */
     public function update(Request $request, int $id)
     {
+        //validate data
+        $this->createValidator($request->all())->validate();
+        
         $attributes = $request->input('attributes');
         $attributes['capacity'] = json_encode($attributes['capacity'], JSON_UNESCAPED_SLASHES);
         $this->deleteImages($attributes['logo']);
@@ -153,5 +139,14 @@ class CinemaController extends Controller
     public function getUserId($token): string
     {
         return $userId = Token::where('token', $token)->first()->tokenable_id;
+    }
+
+    private function createValidator($data) {
+        return Validator::make($data, [
+            'attributes.name' => 'required',
+            'attributes.images' => 'required',
+            'attributes.logo' => 'required',
+            'attributes.capacity' => 'required',
+        ]);
     }
 }

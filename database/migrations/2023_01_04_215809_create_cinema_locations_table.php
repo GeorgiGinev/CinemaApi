@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddCapacityToCinemasTable extends Migration
+class CreateCinemaLocationsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,12 @@ class AddCapacityToCinemasTable extends Migration
      */
     public function up()
     {
-        Schema::table('cinemas', function (Blueprint $table) {
-            $table->json('capacity');
+        Schema::create('cinema_locations', function (Blueprint $table) {
+            $table->id();
+            $table->string('address');
+            $table->double('latitude');
+            $table->double('longitude');
+            $table->timestamps();
         });
     }
 
@@ -25,8 +29,6 @@ class AddCapacityToCinemasTable extends Migration
      */
     public function down()
     {
-        Schema::table('cinemas', function (Blueprint $table) {
-            $table->dropColumn('capacity');
-        });
+        Schema::dropIfExists('cinema_locations');
     }
 }

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddImagesColumnInCinemasTable extends Migration
+class AddDeletedAtToCinemaTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class AddImagesColumnInCinemasTable extends Migration
      */
     public function up()
     {
-        Schema::table('cinemas', function (Blueprint $table) {
-            $table->jsonb('images');
+        Schema::table('cinema', function (Blueprint $table) {
+            //
         });
     }
 
@@ -25,7 +25,7 @@ class AddImagesColumnInCinemasTable extends Migration
      */
     public function down()
     {
-        Schema::table('cinemas', function (Blueprint $table) {
+        Schema::table('cinema', function (Blueprint $table) {
             //
         });
     }

@@ -21,9 +21,15 @@ trait ImageTrait
             foreach ($images as $image) {
                 $randomName = $this->generateRandomName();
                 $fileName = $randomName . ".jpeg";
+
                 $savedImages[] .= $fileName;
-                $image = base64_decode($image);
-                Storage::disk('public')->put("/images/" . $fileName, $image);
+
+                $data = $image;
+                list($type, $data) = explode(';', $data);
+                list(, $data) = explode(',', $data);
+                $data = base64_decode($data);
+
+                Storage::disk('public')->put("/images/" . $fileName, $data);
             }
             return $savedImages;
         }
@@ -31,8 +37,11 @@ trait ImageTrait
         $randomName = $this->generateRandomName();
         $fileName = $randomName . ".jpeg";
 
-        $image = base64_decode($images);
-        Storage::disk('public')->put("/images/" . $fileName, $image);
+        $data = $images;
+        list($type, $data) = explode(';', $data);
+        list(, $data) = explode(',', $data);
+        $data = base64_decode($data);
+        Storage::disk('public')->put("/images/" . $fileName, $data);
         return $fileName;
     }
 
@@ -57,11 +66,21 @@ trait ImageTrait
         if (is_array($images)) {
             $retrievedImages = [];
             foreach ($images as $image) {
-                $retrievedImages[] .= base64_encode(file_get_contents($path. $image));
+                $ftype = pathinfo($path . $image, PATHINFO_EXTENSION);
+                $data = file_get_contents($path . $image);
+
+                $base64 = 'data:image/' . $ftype . ';base64,' . base64_encode($data);
+
+                $retrievedImages[] .= $base64;
             }
             return $retrievedImages;
         }
-        return base64_encode(file_get_contents($path . $images));
+
+        $ftype = pathinfo($path . $images, PATHINFO_EXTENSION);
+        $data = file_get_contents($path . $images);
+
+        $base64 = 'data:image/' . $ftype . ';base64,' . base64_encode($data);
+        return $base64;
     }
 
     /**

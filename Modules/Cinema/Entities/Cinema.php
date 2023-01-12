@@ -2,11 +2,10 @@
 
 namespace Modules\Cinema\Entities;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Models\Base;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use App\Models\User as User;
 
-class Cinema extends Model
+class Cinema extends Base
 {
     use HasFactory;
 
@@ -16,12 +15,13 @@ class Cinema extends Model
         'images',
         'logo',
         'capacity',
-        'cinema_location_id',
-        'owner_id',
+        'deleted_at'
     ];
 
     public function cinemaLocation() {
-        return $this->hasOne(CinemaLocation::class,'id','cinema_location_id');
+        $location = $this->hasOne(CinemaLocation::class, 'id', 'cinema_location_id');
+        
+        return $location;
     }
 
     public function owner() {
