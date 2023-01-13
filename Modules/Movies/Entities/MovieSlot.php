@@ -11,6 +11,7 @@ class MovieSlot extends Model
 
     protected $fillable = [
         'movie_id',
+        'price',
         'date'
     ];
 

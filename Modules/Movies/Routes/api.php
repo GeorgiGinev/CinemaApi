@@ -13,6 +13,11 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/movies', function (Request $request) {
-    return $request->user();
+Route::middleware('auth:sanctum')->prefix('movies')->group(function() {
+    Route::get('/', 'MoviesController@index');
+    Route::post('/', 'MoviesController@store');
+    Route::get('/{id}', 'MoviesController@show');
+    Route::put('/{id}', 'MoviesController@update');
+    Route::delete('/{id}', 'MoviesController@destroy');
+    Route::put('/restore/{id}', 'MoviesController@restore');
 });

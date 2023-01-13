@@ -14,7 +14,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 require 'v1/cinema.php';
-require 'v1/movie.php';
 
 Route::middleware('auth:sanctum')->get('/me', function (Request $request) {
     return $request->user();

@@ -93,12 +93,16 @@ trait ImageTrait
         $path = Storage::path('public/images/');
         if (is_array($media)) {
             foreach ($media as $image) {
-                unlink($path . $image);
+                if(file_exists($path . $media)) {
+                    unlink($path . $media);
+                }
             }
             return;
         }
 
-        unlink($path . $media);
+        if(file_exists($path . $media)) {
+            unlink($path . $media);
+        }
     }
 
     /**

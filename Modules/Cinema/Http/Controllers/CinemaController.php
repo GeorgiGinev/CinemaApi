@@ -4,17 +4,13 @@ namespace Modules\Cinema\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Contracts\Support\Renderable;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 use Modules\Cinema\Entities\Cinema;
 use Modules\Cinema\Entities\CinemaLocation;
 use App\Models\Token as Token;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\ImageTrait;
-use function MongoDB\BSON\toJSON;
 
 class CinemaController extends Controller
 {
