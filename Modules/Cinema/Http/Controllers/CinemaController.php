@@ -75,23 +75,45 @@ class CinemaController extends Controller
         return response()->json($cinema->transform(['cinemaLocation']));
     }
 
+    public function getAll(Request $request)
+    {
+        $keywords = $request->input('keywords');
+        $cinemas = Cinema::where(function ($q) use ($keywords) {
+            if ($keywords) {
+                $q->where('name', 'like', "%{$keywords}%");
+            }
+        })->orderBy('id', 'DESC')->paginate(15);
+
+        $cinemas->transform(function ($cinema) {
+            $cinema->images = json_decode(($cinema->images), true);
+            $cinema->images = $this->retriveImages($cinema->images);
+            $cinema->logo = $this->retriveImages($cinema->logo);
+            $cinema->capacity = json_decode($cinema->capacity, true);
+
+            return $cinema->transform(['cinemaLocation', 'owner']);
+        });
+
+        return $cinemas;
+    }
+
     /**
      * Get one
      * @return null
      */
     public function getMany(Request $request)
     {
+        $user = $request->user();
         $cinemas = null;
         $keywords = $request->input('keywords');
         
         if($request->input('with_trashed')) {
-            $cinemas = Cinema::onlyTrashed()->where(function ($q) use ($keywords) {
+            $cinemas = Cinema::where('owner_id', $user->id)->onlyTrashed()->where(function ($q) use ($keywords) {
                 if($keywords) {
                     $q->where('name', 'like', "%{$keywords}%");
                 }
               })->orderBy('id', 'DESC')->paginate(15);
         } else {
-            $cinemas = Cinema::where(function ($q) use ($keywords) {
+            $cinemas = Cinema::where('owner_id', $user->id)->where(function ($q) use ($keywords) {
                 if($keywords) {
                     $q->where('name', 'like', "%{$keywords}%");
                 }

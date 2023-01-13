@@ -12,9 +12,11 @@ class MoviesController extends Controller
      * Display a listing of the resource.
      * @return Renderable
      */
-    public function index()
+    public function index(Request $request)
     {
-        return view('movies::index');
+        return response()->json([
+            'status' => 'success'
+        ]);
     }
 
     /**
