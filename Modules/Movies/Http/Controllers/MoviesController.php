@@ -16,6 +16,25 @@ class MoviesController extends Controller
     use SoftDeletes;
     use ImageTrait;
     
+    public function allMovies(Request $request) {
+        $keywords = $request->input('keywords');
+        
+        $movies = Movie::whereHas('slots')->where(function ($q) use ($keywords) {
+            if ($keywords) {
+                $q->where('name', 'like', "%{$keywords}%");
+            }
+        })->orderBy('id', 'DESC')->paginate(15);
+
+        $movies->transform(function ($movie) {
+            $movie->image = $this->retriveImages($movie->image);
+
+            $movie->cinema = $movie->getCinema($movie->slots[0])->cinema;
+
+            return $movie->transform(['cinema']);
+        });
+
+        return $movies;
+    }
     /**
      * Display a listing of the resource.
      * @return Renderable
@@ -61,31 +80,28 @@ class MoviesController extends Controller
         $user = $request->user();
         //get request attributes and relationships
         $attributes = $request->input('attributes');
-        
+
         $relationships = $request->input('relationships');
 
         //validate data
-        $this->createValidator($request->all())->validate();
+        $this->createValidator($request->input('attributes'))->validate();
 
         $attributes['image'] = $this->verifyAndUpload($attributes['image']);
 
         $movie = new Movie($attributes);
         $movie->owner_id = $user->id;
 
-        $movie->push();
+        $movie = Movie::create($movie->toArray());
 
-        // foreach($relationships['slots']['data'] as $slot) {
-
-        // }
-
-        // $movieSlot = MovieSlot::create($relationships['movieSlot']['data']);
-        // $cinema->cinema_location_id = $cinemaLocation->id;
-        // $cinema->owner_id = $userId;
-        // $cinema->push();
-
-        return response()->json([
-            'status : ' => $movie
-        ]);
+        if($relationships) {
+            foreach($relationships['slots']['data'] as $slot) {
+                $movieSlot = new MovieSlot($slot['attributes']);
+                $movieSlot->cinema_id = $slot['relationships']['cinema']['id'];
+                $movieSlot->movie_id = $movie->id;
+    
+                MovieSlot::create($movieSlot->toArray());
+            }
+        }
     }
 
     /**
@@ -97,11 +113,24 @@ class MoviesController extends Controller
     {
         $user = $request->user();
 
-        $movie = Movie::withTrashed()->where('owner_id', $user->id)->findOrFail($id)->transform();
+        $movie = Movie::withTrashed()->with('slots')->where('owner_id', $user->id)->findOrFail($id);
 
         if(!$movie) {
             return null;
         }
+        
+        /**  
+         * Generate movie resources with slots->cinema
+         */
+        $slots = $movie->slots;
+        $object = [];
+        foreach($slots as $slot) {
+            array_push($object, $slot->transform(['cinema']));
+        }
+
+        $movie = $movie->transform();
+        $movie->relationships->slots = null;
+        $movie->relationships->slots['data'] = $object;
 
         if($movie->attributes->image) {
             $movie->attributes->image = $this->retriveImages($movie->attributes->image);
@@ -119,10 +148,12 @@ class MoviesController extends Controller
     public function update(Request $request, $id)
     {
         $attributes = $request->input('attributes');
+        $relationships = $request->input('relationships');
+
         $this->createValidator($attributes)->validate();
 
         $user = $request->user();
-        $movie = Movie::withTrashed()->where('owner_id', $user->id)->findOrFail($id);
+        $movie = Movie::withTrashed()->where('owner_id', $user->id)->with('slots')->findOrFail($id);
 
         if(!$movie) {
             return null;
@@ -131,8 +162,47 @@ class MoviesController extends Controller
         $this->deleteImages($movie->image);
         $attributes['image'] = $this->verifyAndUpload($attributes['image']);
 
+        if($relationships) {
+            $relSlots = collect($relationships['slots']['data']);
 
+            $idsNotFound = [];
 
+            foreach($movie->slots as $slot) {
+                $desired_object = $relSlots->first(function($item) use ($slot) {
+                    return (int)$item['id'] == $slot->id;
+                });
+
+                if(!$desired_object) {
+                    array_push($idsNotFound, $slot->id);
+                }
+            }
+
+            if (count($idsNotFound) > 0) {
+                MovieSlot::whereIn('id', $idsNotFound)->delete();
+            }
+        } else {
+            $idsNotFound = [];
+            foreach ($movie->slots as $slot) {
+                array_push($idsNotFound, $slot->id);
+            }
+
+            MovieSlot::whereIn('id', $idsNotFound)->delete();
+        }
+
+        if($relationships) {
+            foreach($relationships['slots']['data'] as $slot) {
+                $movieSlot = new MovieSlot($slot['attributes']);
+                $movieSlot->cinema_id = $slot['relationships']['cinema']['id'];
+                $movieSlot->movie_id = $movie->id;
+
+                if($slot['id']) {
+                    MovieSlot::find((int) $slot['id'])->update($movieSlot->toArray());
+                } else {
+                    MovieSlot::create($movieSlot->toArray());
+                }
+            }
+        }
+        
         return Movie::withTrashed()->where('id', $id)->update($attributes);
     }
 

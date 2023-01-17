@@ -17,6 +17,24 @@ class CinemaController extends Controller
     use SoftDeletes;
     use ImageTrait;
 
+    public function getAllCinemas(Request $request) {
+        $keywords = $request->input('keywords');
+        
+        $cinemas = Cinema::where(function ($q) use ($keywords) {
+            if ($keywords) {
+                $q->where('name', 'like', "%{$keywords}%");
+            }
+        })->orderBy('id', 'DESC')->paginate(15);
+
+        $cinemas->transform(function ($cinema) {
+            $cinema->logo = $this->retriveImages($cinema->logo);
+
+            return $cinema->transform();
+        });
+
+        return $cinemas;
+    }
+
     /**
      * Create
      * @param Request $request

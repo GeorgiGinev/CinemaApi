@@ -21,3 +21,4 @@ Route::middleware('auth:sanctum')->prefix('movies')->group(function() {
     Route::delete('/{id}', 'MoviesController@destroy');
     Route::put('/restore/{id}', 'MoviesController@restore');
 });
+Route::get('/allMovies', 'MoviesController@allMovies');

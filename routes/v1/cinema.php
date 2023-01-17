@@ -12,3 +12,7 @@ Route::controller(CinemaController::class)->middleware('auth:sanctum')->prefix('
     Route::put('/restore/{id}', 'restore');
     Route::get('/all', 'getAll');
 });
+
+Route::controller(CinemaController::class)->prefix('allCinemas')->group(function () {
+    Route::get('/', 'getAllCinemas');
+});
