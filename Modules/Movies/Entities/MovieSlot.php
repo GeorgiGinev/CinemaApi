@@ -23,6 +23,10 @@ class MovieSlot extends Base
         return $this->hasOne(Cinema::class,'id','cinema_id');
     }
 
+    public function movie() {
+        return $this->belongsTo(Movie::class);
+    }
+
     protected static function newFactory()
     {
         return \Modules\Movies\Database\factories\MovieSlotFactory::new();

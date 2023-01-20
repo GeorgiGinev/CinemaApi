@@ -11,15 +11,39 @@ use Modules\Cinema\Entities\CinemaLocation;
 use App\Models\Token as Token;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\ImageTrait;
+use Modules\Movies\Entities\MovieSlot;
 
 class CinemaController extends Controller
 {
     use SoftDeletes;
     use ImageTrait;
 
+    public function getCinema($id) {
+        $cinema = Cinema::with(['slots.cinema', 'slots.movie', 'cinemaLocation'])->findOrFail($id);
+        
+        $cinema->logo = $this->retriveImages($cinema->logo);
+        $cinema->images = json_decode(($cinema->images), true);
+        $cinema->images = $this->retriveImages($cinema->images);
+        $cinema->capacity = json_decode($cinema->capacity, true);
+
+        $relSlots = collect($cinema->slots)->transform(function ($slot) {
+            return $slot->transform(['movie']);
+        });
+        
+        forEach($relSlots as $slot) {
+            $slot->relationships->movie->attributes->image = $this->retriveImages($slot->relationships->movie->attributes->image);
+        }
+
+        $newCinema = $cinema->transform(['slots', 'cinemaLocation']);
+
+        $newCinema->relationships->slots['data'] = $relSlots;
+
+        return $newCinema;
+    }
+
     public function getAllCinemas(Request $request) {
         $keywords = $request->input('keywords');
-        
+
         $cinemas = Cinema::where(function ($q) use ($keywords) {
             if ($keywords) {
                 $q->where('name', 'like', "%{$keywords}%");

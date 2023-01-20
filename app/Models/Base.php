@@ -32,10 +32,10 @@ class Base extends Model
             $rel = [];
 
             for ($i = 0; $i < count($relationships); $i++) {
-                if(is_object($this[$relationships[$i]])) {
-                    $rel[$relationships[$i]] = $this[$relationships[$i]]->transform();
-                } else {
-                    count($this[$relationships[$i]]);
+                try {
+                    if(!$this[$relationships[$i]][0]) {
+                        throw new Exception('Not found');
+                    }
 
                     $rel[$relationships[$i]] = null;
                     $rel[$relationships[$i]]['data'] = [];
@@ -43,6 +43,8 @@ class Base extends Model
                     foreach ($this[$relationships[$i]] as $resource) {
                         array_push($rel[$relationships[$i]]['data'], $resource->transform());
                     }
+                } catch(Exception $e) {
+                    $rel[$relationships[$i]] = $this[$relationships[$i]]->transform();
                 }
             }
 

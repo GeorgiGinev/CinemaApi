@@ -5,66 +5,94 @@ namespace Modules\Bookings\Http\Controllers;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Modules\Bookings\Entities\Booking;
+use Modules\Movies\Entities\MovieSlot;
 
 class BookingsController extends Controller
 {
     /**
      * Display a listing of the resource.
-     * @return Renderable
      */
-    public function index()
+    public function get(Request $request)
     {
-        return view('bookings::index');
-    }
+        $user = $request->user();
 
-    /**
-     * Show the form for creating a new resource.
-     * @return Renderable
-     */
-    public function create()
-    {
-        return view('bookings::create');
+        $bookings = null;
+
+        if($request->input('with_trashed')) {
+            $bookings = Booking::where('user_id', $user->id)->onlyTrashed()->with(['cinema', 'movieSlot.movie'])->get();
+        } else {
+            $bookings = Booking::where('user_id', $request->user()->id)->with(['cinema', 'movieSlot.movie'])->get();
+        }
+
+        $bookings = collect($bookings)->transform(function ($booking) {
+            $movie = $booking->movieSlot->movie;
+            $booking->movie = $movie;
+
+            return $booking->transform(['cinema', 'movieSlot', 'movie']);
+        });
+
+        return response()->json([
+            'data' => $bookings
+        ]);
     }
 
     /**
      * Store a newly created resource in storage.
      * @param Request $request
-     * @return Renderable
      */
-    public function store(Request $request)
+    public function store(Request $request, $cinemaId, $slotId)
     {
-        //
+        $places = $request->input('attributes')['places'];
+
+        $booking = new Booking();
+        $booking->movie_slot_id = (int)$slotId;
+        $booking->cinema_id = (int)$cinemaId;
+        $booking->user_id = $request->user()->id;
+        $booking->places = $places;
+
+        return $booking->push();
     }
 
     /**
      * Show the specified resource.
-     * @param int $id
-     * @return Renderable
      */
-    public function show($id)
+    public function show($cinemaId, $slotId)
     {
-        return view('bookings::show');
+        $bookings = Booking::where('cinema_id', $cinemaId)->where('movie_slot_id', $slotId)->get();
+        $bookings = collect($bookings)->transform(function ($booking) {
+            $newBooking = new Booking($booking->toArray());
+            return $newBooking->transform();
+        });
+
+        return response()->json([
+            'data' => $bookings
+        ]);
     }
 
     /**
-     * Show the form for editing the specified resource.
-     * @param int $id
-     * @return Renderable
+     * Show all resources
      */
-    public function edit($id)
+    public function index(Request $request)
     {
-        return view('bookings::edit');
-    }
+        $user = $request->user();
+        $bookings = Booking::with([
+            'cinema' => function ($q) use ($user) {
+                $q->where('owner_id', $user->id);
+            },
+            'movieSlot.movie', 'user'
+        ])->get();
 
-    /**
-     * Update the specified resource in storage.
-     * @param Request $request
-     * @param int $id
-     * @return Renderable
-     */
-    public function update(Request $request, $id)
-    {
-        //
+        $bookings = collect($bookings)->transform(function ($booking) {
+            $movie = $booking->movieSlot->movie;
+            $booking->movie = $movie;
+
+            return $booking->transform(['cinema', 'movieSlot', 'movie', 'user']);
+        });
+
+        return response()->json([
+            'data' => $bookings
+        ]);
     }
 
     /**
@@ -74,6 +102,12 @@ class BookingsController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $booking =  Booking::findOrFail($id);
+
+        if (!$booking) {
+            return null;
+        }
+
+        return $booking->delete();
     }
 }
