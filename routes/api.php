@@ -15,9 +15,7 @@ use Illuminate\Support\Facades\Route;
 */
 require 'v1/cinema.php';
 
-Route::middleware('auth:sanctum')->get('/me', function (Request $request) {
-    return $request->user();
-});
+Route::middleware('auth:sanctum')->get('/me', [App\Http\Controllers\Auth\UserUpdateController::class, 'get']);
 
 Route::middleware('auth:sanctum')->post('/me/logout', [App\Http\Controllers\Auth\LogoutController::class, 'logout'])->name('logout');
 Route::middleware('auth:sanctum')->post('/me/update', [App\Http\Controllers\Auth\UserUpdateController::class, 'update'])->name('update');

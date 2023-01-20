@@ -79,7 +79,7 @@ class CinemaController extends Controller
         $userId = $request->user()->id;
 
         $attributes['capacity'] = json_encode($attributes['capacity']);
-        $attributes['logo'] = $this->verifyAndUpload($attributes['logo']);
+        $attributes['logo'] = $this->verifyAndUpload($attributes['logo']); 
         $attributes['images'] = json_encode($this->verifyAndUpload($attributes['images']), JSON_UNESCAPED_SLASHES);
 
         //create new cinema and cinema location and link them
