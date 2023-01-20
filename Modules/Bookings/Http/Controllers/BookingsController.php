@@ -20,9 +20,9 @@ class BookingsController extends Controller
         $bookings = null;
 
         if($request->input('with_trashed')) {
-            $bookings = Booking::where('user_id', $user->id)->onlyTrashed()->with(['cinema', 'movieSlot.movie'])->get();
+            $bookings = Booking::where('user_id', $user->id)->orderBy('id', 'desc')->onlyTrashed()->with(['cinema', 'movieSlot.movie'])->get();
         } else {
-            $bookings = Booking::where('user_id', $request->user()->id)->with(['cinema', 'movieSlot.movie'])->get();
+            $bookings = Booking::where('user_id', $request->user()->id)->orderBy('id', 'desc')->with(['cinema', 'movieSlot.movie'])->get();
         }
 
         $bookings = collect($bookings)->transform(function ($booking) {
@@ -76,7 +76,7 @@ class BookingsController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $bookings = Booking::with([
+        $bookings = Booking::orderBy('id', 'desc')->with([
             'cinema' => function ($q) use ($user) {
                 $q->where('owner_id', $user->id);
             },
